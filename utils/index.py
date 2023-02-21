@@ -120,7 +120,8 @@ class Page:
             for sn in special_nodes:
                 text = sn.text_content()
                 word_tokens = self.standardize_(text)
-
+                if len(word_tokens) != 0:
+                    print(f"[Tags    ] -> {self.url}")
                 for w in word_tokens:
                     if self.word_frequency_weights.__contains__(w):
                         self.word_frequency_weights[w][WEIGHTS_INDEX[k2]] += 1
@@ -184,7 +185,7 @@ class Page:
                 self.handle_special_tags()
                 self.output(output_path_prefix, output_file_name)
         except Exception:
-            print(f"error in {self.url}")
+            print(f"[Error   ] -> {self.url}")
 
     def output(self, output_path_prefix: str, output_file_name: str):
         if not os.path.exists(output_path_prefix):
@@ -210,7 +211,7 @@ class Page:
             f.close()
             for hash_value in hash_values:
                 if hamming_distance(hash_value, page_hash_value) <= hash_threshold:
-                    print("[Filter] SimHash -> " + self.url)
+                    print(f"[SHFilter] -> {self.url}")
                     return True
             f = open(f_path, 'wb')
             hash_values.append(page_hash_value)
