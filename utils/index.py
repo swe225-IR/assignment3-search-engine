@@ -177,11 +177,14 @@ class Page:
         return True
 
     def run(self, output_path_prefix: str, output_file_name: str):
-        self.read_json()
-        self.extract_word()
-        if not self.standardize_words():
-            self.handle_special_tags()
-            self.output(output_path_prefix, output_file_name)
+        try:
+            self.read_json()
+            self.extract_word()
+            if not self.standardize_words():
+                self.handle_special_tags()
+                self.output(output_path_prefix, output_file_name)
+        except Exception:
+            print(f"error in {self.url}")
 
     def output(self, output_path_prefix: str, output_file_name: str):
         if not os.path.exists(output_path_prefix):
