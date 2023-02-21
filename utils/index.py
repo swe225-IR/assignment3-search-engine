@@ -179,7 +179,7 @@ class Page:
     def run(self, output_path_prefix: str, output_file_name: str):
         self.read_json()
         self.extract_word()
-        if self.standardize_words():
+        if not self.standardize_words():
             self.handle_special_tags()
             self.output(output_path_prefix, output_file_name)
 
