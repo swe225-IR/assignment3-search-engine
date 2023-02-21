@@ -1,6 +1,6 @@
 import os
 import re
-import sys
+import networkx as nx
 from typing import List
 import json
 from urllib.parse import urlparse, ParseResult
@@ -44,12 +44,12 @@ def get_all_links(args):
                 link_set.add(url[:ind])
             else:
                 link_set.add(url)
-    fff = open("link_set.json", 'a')
+    fff = open("../original_link_set.json", 'a')
     json.dump(list(link_set), fff)
 
 
 def get_links(args):
-    f_l = open("link_set.json", 'r')
+    f_l = open("../original_link_set.json", 'r')
     l_s = set(json.load(f_l))
     dev_path = args[1]
     domains = os.listdir(dev_path)
@@ -146,36 +146,42 @@ def handle_params_or_query(params_or_query_str: str, separator: str) -> str:
 
 def get_page_rank():
     nodes_json = json.load(open("../link_out_edges.json", 'r'))
-    # except_json = json.load(open('except_links.json', 'r'))
-    except_json = []
-    nodes_list = []
-    distinct_links = set()
+    except_json = json.load(open('../duplicate_link.json', 'r'))
+    G = nx.DiGraph()
     for k, v in nodes_json.items():
         if k not in except_json:
             v_p = [x for x in v if x not in except_json]
-            distinct_links.add(k)
-            for v_ in v_p:
-                distinct_links.add(v_)
-            nodes_list.append(Node(k, list(v_p)))
-    distinct_links = list(distinct_links)
-    nodes_map = {}
-    for d in range(0, len(distinct_links)):
-        nodes_map[distinct_links[d]] = d
+            for v1 in v_p:
+                G.add_edge(k, v1)
 
-    M = np.zeros((len(distinct_links), len(distinct_links)), dtype=float32)
-    for j in range(0, len(nodes_list)):
-        out_ = nodes_list[j].outgoing_url
-        if len(out_) == 0:
-            continue
-        for o in out_:
-            M[nodes_map[o]][j] = 1.0 / len(out_)
-
-    d = 0.85
-    I = [1.0] * len(distinct_links)
-    r = np.linalg.inv(np.diag(I) - d * M) * (1 - d) / len(distinct_links) * np.ones((len(distinct_links), 1), dtype=float32)
-    print(r)
+    pgrk = nx.pagerank(G)
+    pgrk_ = sorted(pgrk.items(), key=lambda x: x[1], reverse=True)
+    fp1 = open("pgrk.json", 'a')
+    json.dump(pgrk_, fp1, indent=4)
+    # distinct_links.add(k)
+    # for v_ in v_p:
+    #     distinct_links.add(v_)
+    # nodes_list.append(Node(k, list(v_p)))
+    # distinct_links = list(distinct_links)
+    # nodes_map = {}
+    # for d in range(0, len(distinct_links)):
+    #     nodes_map[distinct_links[d]] = d
+    #
+    # M = np.zeros((len(distinct_links), len(distinct_links)), dtype=float32)
+    # for j in range(0, len(nodes_list)):
+    #     out_ = nodes_list[j].outgoing_url
+    #     if len(out_) == 0:
+    #         continue
+    #     for o in out_:
+    #         M[nodes_map[o]][j] = 1.0 / len(out_)
+    #
+    # d = 0.85
+    # I = [1.0] * len(distinct_links)
+    # r = np.linalg.inv(np.diag(I) - d * M) * (1 - d) / len(distinct_links) * np.ones((len(distinct_links), 1), dtype=float32)
+    # print(r)
     # print(np.nonzero(M))
     # print(M[0, 52365])
+
 
 def is_url_defense(url: str) -> bool:
     return True if re.compile(r'https://urldefense(?:\.proofpoint)?\.com/(v[0-9])/').search(url) else False
