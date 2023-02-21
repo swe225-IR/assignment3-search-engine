@@ -5,9 +5,8 @@ import pickle as pkl
 
 import nltk
 from bs4 import BeautifulSoup
-from lxml import html, etree
+from lxml import html
 from nltk import WordNetLemmatizer, word_tokenize
-from nltk.stem.porter import PorterStemmer
 from simhash import Simhash
 
 TAGS_ABANDON = ['CC', 'DT', 'FW', 'IN', 'LS', 'PDT', 'PRP', 'PRP$', 'RP', 'SYM', 'TO', 'PP']
@@ -16,24 +15,6 @@ TAGS_ADJ = ['JJ', 'JJR', 'JJS', 'ADJP', 'ADVP']
 TAGS_NOUN = ['NN', 'NNS', 'NNP', 'NNPS', 'NP']
 TAGS_ADV = ['RB', 'RBR', 'RBS']
 ADV_OTHERS = ['CD', 'EX', 'MD', 'UH', 'WDT', 'WP', 'WP$', 'WRB', 'SBAR', 'PRT', 'INTJ', 'PNP', '-SBJ', '-OBJ']
-STOP_WORDS = ['a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', "aren't",
-              'as',
-              'at', 'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by', "can't",
-              'cannot', 'could', "couldn't", 'did', "didn't", 'do', 'does', "doesn't", 'doing', "don't", 'down',
-              'during', 'each', 'few', 'for', 'from', 'further', 'had', "hadn't", 'has', "hasn't", 'have', "haven't",
-              'having', 'he', "he'd", "he'll", "he's", 'her', 'here', "here's", 'hers', 'herself', 'him', 'himself',
-              'his', 'how', "how's", 'i', "i'd", "i'll", "i'm", "i've", 'if', 'in', 'into', 'is', "isn't", 'it', "it's",
-              'its', 'itself', "let's", 'me', 'more', 'most', "mustn't", 'my', 'myself', 'no', 'nor', 'not', 'of',
-              'off',
-              'on', 'once', 'only', 'or', 'other', 'ought', 'our', 'ours', 'ourselves', 'out', 'over', 'own', 'same',
-              "shan't", 'she', "she'd", "she'll", "she's", 'should', "shouldn't", 'so', 'some', 'such', 'than', 'that',
-              "that's", 'the', 'their', 'theirs', 'them', 'themselves', 'then', 'there', "there's", 'these', 'they',
-              "they'd", "they'll", "they're", "they've", 'this', 'those', 'through', 'to', 'too', 'under', 'until',
-              'up',
-              'very', 'was', "wasn't", 'we', "we'd", "we'll", "we're", "we've", 'were', "weren't", 'what', "what's",
-              'when', "when's", 'where', "where's", 'which', 'while', 'who', "who's", 'whom', 'why', "why's", 'with',
-              "won't", 'would', "wouldn't", 'you', "you'd", "you'll", "you're", "you've", 'your', 'yours', 'yourself',
-              'yourselves']
 WORD_ABBREVIATION = ['re', 've', 'll', 'ld', 'won', 'could', 'might', 'isn', 'aren', 'couldn', 'hasn', 'haven', 'wasn',
                      'weren']
 
@@ -48,12 +29,6 @@ def hamming_distance(int_a, int_b):
         ans += 1
         x &= x - 1
     return ans
-
-
-def stopwords_filter(word: str) -> str:
-    if word in STOP_WORDS:
-        return ''
-    return word
 
 
 def special_case_filter(word: str) -> str:
@@ -132,10 +107,6 @@ class Page:
         word_pos_tags = nltk.pos_tag(unstandardized_words)
         for word_pos_tag in word_pos_tags:
             word = word_pos_tag[0].replace(' ', '')
-
-            # Remove stopwords
-            if stopwords_filter(word) == '':
-                continue
 
             # Special case filter
             if special_case_filter(word) == '':
@@ -234,14 +205,3 @@ if __name__ == '__main__':
         for fi in files:
             p = Page(f'{dev_path}/{d}/{fi}')
             p.run(f'{dev_path.replace("DEV", "assignment3-search-engine/METADATA")}/{d}', fi.replace(".json", ""))
-            # for k, v in p.inverted_index.items():
-            #     if inverted_index.__contains__(k):
-            #         for k1, v1 in v.items():
-            #             inverted_index[k][k1] = v1
-            #     else:
-            #         inverted_index[k] = {}
-            #         for k1, v1 in v.items():
-            #             inverted_index[k][k1] = v1
-
-    # inverted_index_fp = open("inv_index.json", 'a')
-    # json.dump(inverted_index, inverted_index_fp, indent=4)
