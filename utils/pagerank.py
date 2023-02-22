@@ -45,7 +45,7 @@ def get_all_links(args):
             else:
                 link_set.add(url)
     fff = open("../data/links/original_link_set.json", 'a')
-    json.dump(list(link_set), fff)
+    json.dump(list(link_set), fff, indent=4)
 
 
 def get_links(args):
@@ -181,6 +181,20 @@ def get_page_rank():
     # print(r)
     # print(np.nonzero(M))
     # print(M[0, 52365])
+
+
+def get_duplicate_links():
+    fp = open('../data/links/duplicate_link.json', 'w')
+    fp1 = open('../tmp/output_of_index.log', 'r')
+    lines = fp1.readlines()
+    links = set()
+    for li in lines:
+        try:
+            if li.__contains__("[SHFilter]"):
+                links.add(li.split(" -> ")[1].replace("\n", ''))
+        except Exception:
+            pass
+    json.dump(list(links), fp, indent=4)
 
 
 def is_url_defense(url: str) -> bool:

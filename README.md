@@ -24,7 +24,7 @@ cd ./METADATA
 
 We have already provided the total link set of crawled
 pages: [original_link_set.json](data/links/original_link_set.json).
-Also, from output_of_index.log we can get which [links are duplicated](data/links/duplicate_link.json) (will be
+Also, from output_of_index.log we can get which [links are duplicated](tmp/duplicate_link.json) (will be
 deleted).
 Then we extract links from every web pages using the original data (using `doc.xpath("//a")`), which is stored
 in [link_out_edges.json](data/links/link_out_edges.json).
