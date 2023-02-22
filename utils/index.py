@@ -103,7 +103,7 @@ class Page:
             word_list.append(word)
             if add:
                 self.current_page_word_num += 1
-        print(word_list)
+        # print(word_list)
         return word_list
 
     def standardize_words(self):
