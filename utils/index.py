@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from lxml import html
 from nltk import WordNetLemmatizer, word_tokenize
 from simhash import Simhash
+from nltk.stem.snowball import SnowballStemmer
 
 TAGS_ABANDON = ['CC', 'DT', 'FW', 'IN', 'LS', 'PDT', 'PRP', 'PRP$', 'RP', 'SYM', 'TO', 'PP']
 TAGS_VERB = ['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'VP']
@@ -15,8 +16,8 @@ TAGS_ADJ = ['JJ', 'JJR', 'JJS', 'ADJP', 'ADVP']
 TAGS_NOUN = ['NN', 'NNS', 'NNP', 'NNPS', 'NP']
 TAGS_ADV = ['RB', 'RBR', 'RBS']
 ADV_OTHERS = ['CD', 'EX', 'MD', 'UH', 'WDT', 'WP', 'WP$', 'WRB', 'SBAR', 'PRT', 'INTJ', 'PNP', '-SBJ', '-OBJ']
-WORD_ABBREVIATION = ['re', 've', 'll', 'ld', 'won', 'could', 'might', 'isn', 'aren', 'couldn', 'hasn', 'haven', 'wasn',
-                     'weren']
+WORD_ABBREVIATION = ['re', 've', 'll', 'ld', 'won', 'could', 'might']
+
 
 WEIGHTS = {"b": 1, "h4": 1, "h3": 2, "h2": 3, "h1": 4, "title": 5}
 WEIGHTS_INDEX = {"b": 1, "h4": 2, "h3": 3, "h2": 4, "h1": 5, "title": 6}
@@ -33,30 +34,16 @@ def hamming_distance(int_a, int_b):
 
 def special_case_filter(word: str) -> str:
     if len(word) == 1:
-        return ''
-    elif (len(word) >= 2) and (word in WORD_ABBREVIATION):
-        return ''
+        return None
+    elif (len(word) == 2) and (word in WORD_ABBREVIATION):
+        return None
+    elif word == '\'m':
+        return 'am'
+    elif word == 'n\'t':
+        return 'not'
+    elif word == 'wo':
+        return 'will'
     return word
-
-
-def pos_tags_filter(tag: str) -> str:
-    """
-    Filter the words that belong to the tags we do not need and get wordnet compatible tags
-    :param tag: Pos tags
-    :return: Wordnet compatible tags
-    """
-    if tag in TAGS_ADJ:
-        return nltk.corpus.wordnet.ADJ
-    elif tag in TAGS_VERB:
-        return nltk.corpus.wordnet.VERB
-    elif tag in TAGS_NOUN:
-        return nltk.corpus.wordnet.NOUN
-    elif tag in TAGS_ADV:
-        return nltk.corpus.wordnet.ADV
-    elif tag in ADV_OTHERS:
-        return 'add'
-    else:
-        return ''
 
 
 class Page:
@@ -101,30 +88,22 @@ class Page:
                     if self.word_frequency_weights.__contains__(w):
                         self.word_frequency_weights[w][WEIGHTS_INDEX[k2]] += 1
 
-    def standardize_(self, content: str, add=False, lemmatizer=WordNetLemmatizer()):
+    def standardize_(self, content: str, add=False, stemmer=SnowballStemmer(language="english")):
         word_list = []
         unstandardized_words = word_tokenize(content.lower())
-        word_pos_tags = nltk.pos_tag(unstandardized_words)
-        for word_pos_tag in word_pos_tags:
-            word = word_pos_tag[0].replace(' ', '')
+        for word in unstandardized_words:
+            word = word.replace(' ', '')
 
             # Special case filter
-            if special_case_filter(word) == '':
+            word = special_case_filter(word)
+            if word is None:
                 continue
             # Get the classification of words and do the initial filter
-            wordnet_tag = pos_tags_filter(word_pos_tag[1])
-            if wordnet_tag == '':
-                continue
-            elif wordnet_tag == 'add':
-                word_list.append(word)
-                if add:
-                    self.current_page_word_num += 1
-            else:
-                # Lemmatization todo: use lemmatization or stemming?
-                standardize_word = lemmatizer.lemmatize(word, wordnet_tag)
-                word_list.append(standardize_word)
-                if add:
-                    self.current_page_word_num += 1
+            word = stemmer.stem(word)
+            word_list.append(word)
+            if add:
+                self.current_page_word_num += 1
+        print(word_list)
         return word_list
 
     def standardize_words(self):
