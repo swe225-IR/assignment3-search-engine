@@ -1,1 +1,1 @@
-rm -rf ./data/*.pkl *.pkl output.log ./METADATA/*
+rm -rf ./data/*.pkl *.pkl output_of_index.log ./METADATA/*

@@ -192,7 +192,6 @@ class Page:
 
 
 if __name__ == '__main__':
-    FILTER_PAGES = set()
     """
     sys.argv[1] -> absolute value
     """
