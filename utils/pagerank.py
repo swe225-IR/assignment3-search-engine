@@ -44,12 +44,12 @@ def get_all_links(args):
                 link_set.add(url[:ind])
             else:
                 link_set.add(url)
-    fff = open("../original_link_set.json", 'a')
+    fff = open("../data/links/original_link_set.json", 'a')
     json.dump(list(link_set), fff)
 
 
 def get_links(args):
-    f_l = open("../original_link_set.json", 'r')
+    f_l = open("../data/links/original_link_set.json", 'r')
     l_s = set(json.load(f_l))
     dev_path = args[1]
     domains = os.listdir(dev_path)
@@ -145,8 +145,8 @@ def handle_params_or_query(params_or_query_str: str, separator: str) -> str:
 
 
 def get_page_rank():
-    nodes_json = json.load(open("../link_out_edges.json", 'r'))
-    except_json = json.load(open('../duplicate_link.json', 'r'))
+    nodes_json = json.load(open("../data/links/link_out_edges.json", 'r'))
+    except_json = json.load(open('../data/links/duplicate_link.json', 'r'))
     G = nx.DiGraph()
     for k, v in nodes_json.items():
         if k not in except_json:
