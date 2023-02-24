@@ -26,15 +26,10 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-<<<<<<< HEAD
-.idea
-METADATA.zip
-METADATA
-=======
 METADATA.zip
 METADATA
 data/index
->>>>>>> calculate_tf-idf
+utils/test.py
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
