@@ -1,10 +1,9 @@
-# %%
 from typing import Dict
 import math
 import json
 import numpy as np
 import os
-from collections import Counter
+import pickle
 
 
 class TFIDF:
@@ -17,10 +16,10 @@ class TFIDF:
         self.page_number = page_number
         self.weights = np.array(weights)
         self.word_counts = 0
-        self.word_tf = {}
-        self.word_idf = {}
-        self.word_tf_idf = {}
-        self.tf_idf_result = {}  # {word: [tf, idf]}
+        self.word_tf = dict()
+        self.word_idf = dict()
+        self.word_tf_idf = dict()
+        self.tf_idf_result = dict()  # {word: [tf, idf]}
 
     def calculate_weighted_frequency(self, k, v):
         v = np.array(v)
@@ -56,19 +55,22 @@ class TFIDF:
         # self.calculate_if_idf()
 
     def save(self, folder_path, sub_folder, file_name, url):
+        if not os.path.exists(folder_path):
+            os.mkdir(folder_path)
+
         if not os.path.exists(folder_path + sub_folder):
             os.mkdir(folder_path + sub_folder)
 
         save_dic = {url: self.tf_idf_result}
-        with open(folder_path + file_name, 'w') as f:
-            json.dump(save_dic, f, indent=4)
+        with open(folder_path + file_name, 'wb') as f:
+            pickle.dump(save_dic, f)
 
     def reset(self):
         self.word_counts = 0
-        self.word_tf = {}
-        self.word_idf = {}
-        self.word_tf_idf = {}
-        self.tf_idf_result = {}
+        self.word_tf = dict()
+        self.word_idf = dict()
+        self.word_tf_idf = dict()
+        self.tf_idf_result = dict()
 
 
 def read_json(path):
@@ -77,7 +79,6 @@ def read_json(path):
         for key in page:
             url = key
             break
-
         return [url, page[[*page][0]]['word_frequency_weights']]
 
 
@@ -102,7 +103,7 @@ if __name__ == '__main__':
             [url, word_frequencies] = read_json(root_dir + rel_file)
 
             tfidf_calculator.calculate(word_frequencies)
-            tfidf_calculator.save(output_dir, rel_dir, rel_file, url)
+            tfidf_calculator.save(output_dir, rel_dir, rel_file[:-15]+'.pickle', url)
             tfidf_calculator.reset()
 
             page_progress += 1
