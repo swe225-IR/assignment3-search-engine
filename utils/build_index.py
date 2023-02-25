@@ -28,25 +28,12 @@ class Database:
             self.temp_word_save_path = self.word_save_path
             self.valid_folder(word)
             if not os.path.exists(self.temp_word_save_path + '/' + word + '.pickle'):
-                with open(self.temp_word_save_path + '/' + word + '.pickle', 'wb') as fi:
-                    # new_info_dic = dict()
-                    # new_info_dic[tfidf_sub_folder] = [pkl_file]
-                    # pickle.dump(new_info_dic, f)
-                    pickle.dump([tfidf_sub_folder, pkl_file], fi)
+                with open(self.temp_word_save_path + '/' + word + '.pickle', 'wb') as f:
+                    pickle.dump([tfidf_sub_folder, pkl_file], f)
                     continue
 
-            # with open(self.temp_word_save_path + '/' + word + '.pickle', 'rb') as f:
-            #     saved_info_dic = pickle.load(f)
-            #     pkl_file_list = saved_info_dic.get(tfidf_sub_folder, None)
-            #     if pkl_file_list is None:
-            #         saved_info_dic[tfidf_sub_folder] = [pkl_file]
-            #     else:
-            #         saved_info_dic[tfidf_sub_folder] = pkl_file_list.append(pkl_file)
-
-            # with open(self.temp_word_save_path + '/' + word + '.pickle', 'wb') as f:
-            #     pickle.dump(saved_info_dic, f)
-            with open(self.temp_word_save_path + '/' + word + '.pickle', 'ab') as fi:
-                pickle.dump([tfidf_sub_folder, pkl_file], fi)
+            with open(self.temp_word_save_path + '/' + word + '.pickle', 'ab') as f:
+                pickle.dump([tfidf_sub_folder, pkl_file], f)
 
     def valid_folder(self, word):
         """
