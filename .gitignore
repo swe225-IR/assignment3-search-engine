@@ -28,7 +28,7 @@ share/python-wheels/
 MANIFEST
 METADATA.zip
 METADATA
-data/index
+data/index/
 utils/test.py
 
 # PyInstaller
