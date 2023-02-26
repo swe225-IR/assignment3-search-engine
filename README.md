@@ -29,4 +29,4 @@ deleted).
 Then we extract links from every web pages using the original data (using `doc.xpath("//a")`), which is stored
 in [link_out_edges.json](data/links/link_out_edges.json).
 Run `python pagerank.py` under the directory of `utils`.
-And we can get the value of each page (after being filtered): [pgrk.json](utils/pgrk.json)
+And we can get the value of each page (after being filtered): [pgrk.json](../temp/pgrk.json)
