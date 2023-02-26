@@ -156,7 +156,7 @@ def get_page_rank():
 
     pgrk = nx.pagerank(G)
     pgrk_ = sorted(pgrk.items(), key=lambda x: x[1], reverse=True)
-    fp1 = open("pgrk.json", 'a')
+    fp1 = open("../temp/pgrk.json", 'a')
     json.dump(pgrk_, fp1, indent=4)
     # distinct_links.add(k)
     # for v_ in v_p:
