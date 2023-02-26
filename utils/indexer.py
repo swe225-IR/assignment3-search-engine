@@ -56,6 +56,7 @@ class Indexer:
         words = self.standardize_(query)
         for word in words:
             path = self.word_indexer(word)
+
             path = os.path.join(path, word + '.pickle')
             paths = list()
 
@@ -74,12 +75,4 @@ class Indexer:
             link_info = self.link_indexer(paths, word)
             answer_pages_info[word] = link_info
 
-        pprint.pprint(answer_pages_info)
-
-
-if __name__ == '__main__':
-    start_time = time.time()
-    query = sys.argv[1]
-    indexer = Indexer(tfidf_path='../data/index/tfidf/', words_index_path='../data/index/words_index/')
-    indexer.get_urls(query)
-    print('Time: ' + str((time.time() - start_time)))
+        # pprint.pprint(answer_pages_info)
