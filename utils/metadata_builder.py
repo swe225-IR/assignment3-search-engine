@@ -107,7 +107,7 @@ class Page:
         return word_list
 
     def standardize_words(self):
-        hash_values_path = 'hash_values.pkl'
+        hash_values_path = '../data/word_standardize/hash_values.pkl'
         word_list = self.standardize_(self.content, True)
         for w in word_list:
             if self.word_frequency_weights.__contains__(w):
