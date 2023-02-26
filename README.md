@@ -11,7 +11,7 @@ conda create -n a2 python=3.10
 conda activate a2
 pip install -r requirements.txt
 rm -rf *.pkl output_of_index.log ./METADATA/*
-nohup python utils/index.py your/abs/path/to/DEV/ > output_of_index.log 2>&1 &
+nohup python utils/metadata_builder.py your/abs/path/to/DEV/ > output_of_index.log 2>&1 &
 ```
 
 3. Check metadata of the pages:
