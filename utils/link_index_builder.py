@@ -4,6 +4,7 @@ import json
 import numpy as np
 import os
 import pickle
+import sys
 
 
 class TFIDF:
@@ -19,7 +20,7 @@ class TFIDF:
         self.word_tf = dict()
         self.word_idf = dict()
         self.word_tf_idf = dict()
-        self.tf_idf_result = dict()  # {word: [tf, idf]}
+        self.tf_idf_result = dict()  # {1st of word: {2nd of word: {3rd of word: {word: [tf, idf]}}}}
 
     def calculate_weighted_frequency(self, k, v):
         v = np.array(v)
@@ -54,16 +55,40 @@ class TFIDF:
         self.calculate_idf(word_frequencies)
         # self.calculate_if_idf()
 
-    def save(self, folder_path, sub_folder, file_name, url):
-        if not os.path.exists(folder_path):
-            os.mkdir(folder_path)
+    def save(self, tfidf_folder_path, domain_folder, sub_folder_name, url:str):
+        '''
+        :param tfidf_folder_path: '../data/index/tfidf/'
+        :param domain_folder: xxx_xxx_xxx_edu
+        :param sub_folder_name: xxxxx
+        '''
+        if not os.path.exists(tfidf_folder_path):
+            os.mkdir(tfidf_folder_path)
 
-        if not os.path.exists(folder_path + sub_folder):
-            os.mkdir(folder_path + sub_folder)
+        if not os.path.exists(tfidf_folder_path + domain_folder):  # '../data/index/tfidf/xxx_xxx_xxx_edu/'
+            os.mkdir(tfidf_folder_path + domain_folder)
 
-        save_dic = {url: self.tf_idf_result}
-        with open(folder_path + file_name, 'wb') as f:
-            pickle.dump(save_dic, f)
+        page_folder_path = os.path.join(tfidf_folder_path + domain_folder, sub_folder_name) # '../data/index/tfidf/xxx_xxx_xxx_edu/xxxxx/'
+        if not os.path.exists(page_folder_path):
+            os.mkdir(page_folder_path)
+
+        url_file_path = os.path.join(page_folder_path, 'URL_info.pickle')
+        with open(url_file_path, 'wb') as f:
+            pickle.dump(url, f)
+
+        for k, v in self.tf_idf_result.items():
+            if not k.isalnum():
+                continue
+
+            path = page_folder_path
+            # Create the folder with tree structure for a word
+            for index in (range(3) if len(k) >= 3 else range(len(k))):
+                path = os.path.join(path, k[index])
+                if not os.path.exists(path):
+                    os.mkdir(path)
+
+            path = os.path.join(path, k + '.pickle')
+            with open(path, 'wb') as f:
+                pickle.dump(self.tf_idf_result[k], f)
 
     def reset(self):
         self.word_counts = 0
@@ -82,7 +107,19 @@ def read_json(path):
         return [url, page[[*page][0]]['word_frequency_weights']]
 
 
+def calculated_finished_process(root_dir, output_dir):
+    page_number = 0
+    sub_folders = os.listdir(output_dir)[:-1]  # Ignore final folder because we cannot make sure the folder is finished
+    for index in range(len(sub_folders)):
+        temp_path = os.path.join(root_dir, sub_folders[index])
+        page_number += len(os.listdir(temp_path))
+        sub_folders[index] = temp_path
+
+    return [page_number, sub_folders]
+
+
 if __name__ == '__main__':
+    is_restart = sys.argv[1]
     print('Loading corpus...')
     with open('../data/index/corpus.json', 'r') as f:
         corpus = json.load(f)
@@ -95,17 +132,30 @@ if __name__ == '__main__':
 
     print('Start calculating...')
     page_progress = 0
+    finished_folders = []
     tfidf_calculator = TFIDF(corpus, page_number)
+
+    if is_restart == '0':
+        [page_progress, finished_folders] = calculated_finished_process(root_dir, output_dir)
+        print('    |--Start from page: ' + str(page_progress))
+
     for dir_, _, files in os.walk(root_dir):
+        if is_restart == '0' and dir_ in finished_folders:
+            print('        |--Done: ' + dir_ + ' ' + str(int((page_progress / page_number) * 100)) + '%')
+            continue
+
         for file_name in files:
-            rel_dir = os.path.relpath(dir_, root_dir)
-            rel_file = os.path.join(rel_dir, file_name)
+            rel_dir = os.path.relpath(dir_, root_dir)  # dir_: xxx_xxx_xxx_edu
+            rel_file = os.path.join(rel_dir, file_name)  # file_name: xxx_meta_data.json
             [url, word_frequencies] = read_json(root_dir + rel_file)
 
             tfidf_calculator.calculate(word_frequencies)
-            tfidf_calculator.save(output_dir, rel_dir, rel_file[:-15]+'.pickle', url)
+            tfidf_calculator.save(tfidf_folder_path=output_dir,
+                                  domain_folder=rel_dir,
+                                  sub_folder_name=file_name[:-15],
+                                  url=url)
             tfidf_calculator.reset()
-
             page_progress += 1
-            if page_progress % 500 == 0:
-                print('Progress: ' + str(int((page_progress / page_number) * 100)) + '%')
+
+        print('        |--Done: ' + dir_ + ' ' + str(int((page_progress / page_number) * 100)) + '%')
+
