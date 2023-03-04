@@ -29,6 +29,7 @@ MANIFEST
 METADATA.zip
 METADATA
 data/index/
+utils/test.py
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
