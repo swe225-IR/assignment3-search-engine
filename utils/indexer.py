@@ -1,7 +1,8 @@
 import pickle
-import sys
 import os
 import pprint
+import hashlib
+import sys
 import time
 
 from nltk import word_tokenize
@@ -9,37 +10,8 @@ from nltk.stem.snowball import SnowballStemmer
 
 
 class Indexer:
-    def __init__(self, tfidf_path: str, words_index_path: str):
-        self.tfidf_path = tfidf_path
-        self.words_index_path = words_index_path
-
-    def word_indexer(self, word: str):
-        '''
-        :return: relative path. eg. ../data/index/words_index/a/b/c/abc.pickle
-        '''
-        word_path = self.words_index_path
-        for index in range(0, 3):
-            if index > len(word):
-                break
-
-            word_path = os.path.join(word_path, word[index: index + 1])
-
-        return word_path
-
-    def link_indexer(self, paths: list, word: str):
-        '''
-        :return: The tf and idf socre of the word in every page it appears.
-                 eg. {url1: [tf, idf], url2: [tf, idf]}
-        '''
-        link_info_s = {}
-        for path in paths:
-            with open(path, 'rb') as f:
-                link_info = pickle.load(f)
-                for k in link_info:
-                    url = k
-                    break
-                link_info_s[url] = link_info[url].get(word, None)
-        return link_info_s
+    def __init__(self, indexer_folder: str):
+        self.indexer_folder = indexer_folder
 
     def standardize_(self, query: str, stemmer=SnowballStemmer(language="english")):
         word_list = []
@@ -51,35 +23,34 @@ class Indexer:
             word_list.append(word)
         return word_list
 
-    def get_urls(self, query: str):
+    def get_tf_idf(self, query: str):
         answer_pages_info = {}
         words = self.standardize_(query)
-        for word in words:
-            path = self.word_indexer(word)
-            path = os.path.join(path, word + '.pickle')
-            paths = list()
 
-            if not os.path.exists(path):
+        for word in words:
+            word_hash = hashlib.md5(word.encode()).hexdigest()
+            word_path = os.path.join(self.indexer_folder, word_hash + '.pickle')
+            if not os.path.exists(word_path):
                 continue
 
-            with open(path, 'rb') as f:
+            if answer_pages_info.get(word, None) is None:
+                answer_pages_info[word] = []
+
+            with open(word_path, 'rb') as f:  # Open word index .pkl file to get link index location
                 while True:
                     try:
-                        link_id = pickle.load(f)
-                        link_sub_path = self.tfidf_path + link_id[0] + '/' + link_id[1]
-                        paths.append(link_sub_path + '.pickle')
+                        single_page_info = pickle.load(f)  # [doamin, folder_name]
+                        answer_pages_info[word].append(single_page_info)
                     except:
                         break
 
-            link_info = self.link_indexer(paths, word)
-            answer_pages_info[word] = link_info
-
-        pprint.pprint(answer_pages_info)
+        # pprint.pprint(answer_pages_info)
 
 
 if __name__ == '__main__':
     start_time = time.time()
     query = sys.argv[1]
-    indexer = Indexer(tfidf_path='../data/index/tfidf/', words_index_path='../data/index/words_index/')
-    indexer.get_urls(query)
-    print('Time: ' + str((time.time() - start_time)))
+    indexer = Indexer(indexer_folder='../data/index/indexer/')
+    indexer.get_tf_idf(query)
+    total_time = time.time() - start_time
+    print('Time in total: ' + format(total_time, '.4f'))
