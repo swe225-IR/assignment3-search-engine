@@ -54,11 +54,15 @@ def time_printer(title:str, level:int, numerator, denominator):  # numerator / d
 
 
 if __name__ == '__main__':
-    start_time = time.time()
-    query = sys.argv[1]
-    indexer = TestIndexer(indexer_folder='../data/index/indexer/')
-    indexer.get_tf_idf(query)
-    total_time = time.time() - start_time
-    print('Time in total: ' + format(total_time, '.4f'))
-    time_printer('word_operation_time', 1, indexer.word_operation_time, total_time)
-    time_printer('pkl_operation_time', 1, indexer.pkl_operation_time, total_time)
+    # start_time = time.time()
+    # query = sys.argv[1]
+    # indexer = TestIndexer(indexer_folder='../data/index/indexer/')
+    # indexer.get_tf_idf(query)
+    # total_time = time.time() - start_time
+    # print('Time in total: ' + format(total_time, '.4f'))
+    # time_printer('word_operation_time', 1, indexer.word_operation_time, total_time)
+    # time_printer('pkl_operation_time', 1, indexer.pkl_operation_time, total_time)
+    with open('../data/index/pgrk.pickle', 'rb') as f:
+        page_rank = pickle.load(f)
+
+    print(page_rank.get("http://www-db.ics.uci.edu/pages/research/distrib.shtml", None))
