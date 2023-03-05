@@ -148,15 +148,10 @@ class Indexer:
         return self.final_rank
 
 
-if __name__ == '__main__':
-    start_time = time.time()
-    query = sys.argv[1]
-    indexer = Indexer(indexer_folder='../data/index/indexer/', query=query)
-    # indexer.get_tf_idf_of_query()
-    # indexer.rank(tf_idf_weight=0.95, page_rank_weight=0.05)
-    indexer.rank()
-    print(str(time.time() - start_time))
-    # print(indexer.final_rank)
-    # with open('../data/index/pgrk.pickle', 'rb') as f:
-    #     page_rank = pickle.load(f)
-    #     print(page_rank['https://aiclub.ics.uci.edu/'])
+# if __name__ == '__main__':
+#     start_time = time.time()
+#     query = sys.argv[1]
+#     indexer = Indexer(indexer_folder='../data/index/indexer/', query=query)
+#     # indexer.rank(tf_idf_weight=0.95, page_rank_weight=0.05)
+#     indexer.rank()
+#     print(str(time.time() - start_time))
