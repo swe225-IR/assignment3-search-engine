@@ -3,11 +3,11 @@ import re
 import networkx as nx
 from typing import List
 import json
-from urllib.parse import urlparse, ParseResult
-import numpy as np
+import pickle
+import pprint
 
+from urllib.parse import urlparse, ParseResult
 from lxml import etree
-from numpy import float32
 
 
 class Node:
@@ -145,8 +145,11 @@ def handle_params_or_query(params_or_query_str: str, separator: str) -> str:
 
 
 def get_page_rank():
+    print('Load links information...')
     nodes_json = json.load(open("../data/links/link_out_edges.json", 'r'))
     except_json = json.load(open('../data/links/duplicate_link.json', 'r'))
+
+    print('Construct network graph...')
     G = nx.DiGraph()
     for k, v in nodes_json.items():
         if k not in except_json:
@@ -154,10 +157,20 @@ def get_page_rank():
             for v1 in v_p:
                 G.add_edge(k, v1)
 
+    print('Calculate page rank...')
     pgrk = nx.pagerank(G)
     pgrk_ = sorted(pgrk.items(), key=lambda x: x[1], reverse=True)
-    fp1 = open("pgrk.json", 'a')
-    json.dump(pgrk_, fp1, indent=4)
+
+    url_rank = {}
+    for rank in range(1, len(pgrk_) + 1):
+        url_rank[pgrk_[rank - 1][0]] = rank
+
+    pprint.pprint(url_rank)
+    with open('../data/index/pgrk.pickle', 'wb') as f:
+        pickle.dump(url_rank, f)
+
+    # fp1 = open("../temp/pgrk.json", 'a')
+    # json.dump(pgrk_, fp1, indent=4)
     # distinct_links.add(k)
     # for v_ in v_p:
     #     distinct_links.add(v_)
