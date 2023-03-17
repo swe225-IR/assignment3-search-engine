@@ -38,6 +38,7 @@ class Indexer:
             word_hash = hashlib.md5(word.encode()).hexdigest()
             word_path = os.path.join(self.indexer_folder, word_hash + '.pickle')
             if not os.path.exists(word_path):
+                self.words.remove(word)
                 continue
 
             if self.pages_reverse_tfidf_rank.get(word, None) is None:
@@ -148,10 +149,13 @@ class Indexer:
         return self.final_rank
 
 
-# if __name__ == '__main__':
-#     start_time = time.time()
-#     query = sys.argv[1]
-#     indexer = Indexer(indexer_folder='../data/index/indexer/', query=query)
-#     # indexer.rank(tf_idf_weight=0.95, page_rank_weight=0.05)
-#     indexer.rank()
-#     print(str(time.time() - start_time))
+if __name__ == '__main__':
+    start_time = time.time()
+    query = sys.argv[1]
+    indexer = Indexer(indexer_folder='../data/index/indexer/', query=query)
+    # rank = indexer.rank(tf_idf_weight=0.95, page_rank_weight=0.05)
+    rank = indexer.rank()
+    pprint.pprint(rank[:10])
+    print('URL number: ' + str(len(rank)))
+    # indexer.rank()
+    print('Time: ' + str(time.time() - start_time))
