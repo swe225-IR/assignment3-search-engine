@@ -150,12 +150,29 @@ class Indexer:
 
 
 if __name__ == '__main__':
-    start_time = time.time()
-    query = sys.argv[1]
-    indexer = Indexer(indexer_folder='../data/index/indexer/', query=query)
-    # rank = indexer.rank(tf_idf_weight=0.95, page_rank_weight=0.05)
-    rank = indexer.rank()
-    pprint.pprint(rank[:10])
-    print('URL number: ' + str(len(rank)))
-    # indexer.rank()
-    print('Time: ' + str(time.time() - start_time))
+    # start_time = time.time()
+    # query = sys.argv[1]
+    queries = [
+        "computer vision",
+        "academic student employee",
+        "natural language",
+        "software testing",
+        "international student",
+        "graphic",
+        "information"
+    ]
+    q1 = open("./results.json", 'w')
+    d = {}
+    for q in queries:
+        start_time = time.time()
+        indexer = Indexer(indexer_folder='../data/index/indexer/', query=q)
+        d[q] = {}
+        d[q]['0.95'] = indexer.rank(tf_idf_weight=0.95, page_rank_weight=0.05)[:10]
+        # indexer.rank()
+        time1 = time.time()
+        print("time1:", str(time1 - start_time))
+        time2 = time.time()
+        indexer = Indexer(indexer_folder='../data/index/indexer/', query=q)
+        d[q]['0.85'] = indexer.rank(tf_idf_weight=0.85, page_rank_weight=0.15)[:10]
+        print("time2:", str(time.time() - time2))
+    json.dump(d, q1, indent=4)
